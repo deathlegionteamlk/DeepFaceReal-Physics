@@ -1,3 +1,9 @@
+"""
+DeepFaceReal-Physics Streamlit UI v2.0.0
+Powered By DeathLegionTeamLK
+Professional UI with all engine controls, audio input modes, HeyGen Mode preset,
+mobile camera QR, recording export, and dark theme.
+"""
 import os
 import sys
 import cv2
@@ -9,88 +15,83 @@ from PIL import Image
 from io import BytesIO
 from typing import Optional
 import io
+import base64
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from core.face_swapper import get_swapper, FaceSwapper
-from core.character_manager import get_character_manager, Character, CharacterManager
-from core.llm_character import create_llm_character, LLMCharacter
-from core.physics_engine import get_tracker, HolisticTracker, CREDITS as PHY_CREDITS
-from core.background_engine import get_background, ParallaxBackground
+from core.face_swapper import get_swapper
+from core.character_manager import get_character_manager, Character
+from core.llm_character import create_llm_character
+from core.physics_engine import get_tracker
+from core.background_engine import get_background
+from core.face_3d_engine import get_face_3d_engine
+from core.talking_head import get_talking_head
+from core.lip_sync import create_lip_sync
+from core.eye_engine import get_eye_engine
+from core.gesture_engine import get_gesture_engine
+from core.pipeline import get_realtime_pipeline, RealTimePipeline
 
-CREDITS = 'Powered By DeathLegionTeamLK'
+CREDITS = "Powered By DeathLegionTeamLK"
+APP_VERSION = "v2.0.0"
 
 st.set_page_config(
-    page_title="DeepFaceReal Physics - Real-Time Deepfake",
+    page_title="DeepFaceReal-Physics - Hyper-Realistic AI Avatar",
     page_icon="🎭",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 st.markdown("""
 <style>
-.main-header { font-size: 2em; font-weight: bold; margin-bottom: 0; }
-.char-card { padding: 1em; border: 1px solid #444; border-radius: 10px; margin: 0.5em 0; }
-.success-text { color: #00ff88; }
-.warning-text { color: #ffaa00; }
-.stChat { margin-top: 1em; }
-.stats-box { background: #1e1e1e; border-radius: 8px; padding: 12px; margin: 8px 0; }
-.credit-footer { text-align: center; color: #888; padding: 20px 0 10px 0; font-size: 0.9em; border-top: 1px solid #333; margin-top: 30px; }
-.powered { color: #ff6b6b; font-weight: bold; }
+    .main-header { font-size: 2.2em; font-weight: bold; color: #ff6b6b; margin-bottom: 0; }
+    .sub-header { font-size: 1.0em; color: #aaa; margin-top: 0; }
+    .char-card { padding: 1em; border: 1px solid #444; border-radius: 10px; margin: 0.5em 0; background: #1a1a2e; }
+    .success-text { color: #00ff88; }
+    .warning-text { color: #ffaa00; }
+    .stats-box { background: #1e1e1e; border-radius: 8px; padding: 12px; margin: 8px 0; }
+    .credit-footer { text-align: center; color: #888; padding: 20px 0 10px 0; font-size: 0.9em; border-top: 1px solid #333; margin-top: 30px; }
+    .powered { color: #ff6b6b; font-weight: bold; }
+    .heygen-badge { background: linear-gradient(135deg, #ff6b6b, #ffa500); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+    .engine-card { border: 1px solid #444; border-radius: 8px; padding: 10px; margin: 5px 0; background: #16213e; }
+    .stRadio > div { flex-direction: row; gap: 10px; }
+    .stRadio label { padding: 8px 16px; border: 1px solid #555; border-radius: 8px; }
+    div[data-testid="stSidebarNav"] { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
 if 'swapper' not in st.session_state:
     with st.spinner("Loading face swap engine..."):
         st.session_state.swapper = get_swapper(det_size=(320, 320))
-
 if 'char_manager' not in st.session_state:
     st.session_state.char_manager = get_character_manager()
-
 if 'llm' not in st.session_state:
     st.session_state.llm = create_llm_character(os.environ.get("OPENROUTER_API_KEY", ""))
+if 'face_3d' not in st.session_state:
+    st.session_state.face_3d = get_face_3d_engine()
+if 'talking_head' not in st.session_state:
+    st.session_state.talking_head = get_talking_head()
+if 'lip_sync' not in st.session_state:
+    st.session_state.lip_sync = create_lip_sync()
+if 'eye_engine' not in st.session_state:
+    st.session_state.eye_engine = get_eye_engine()
+if 'gesture_engine' not in st.session_state:
+    st.session_state.gesture_engine = get_gesture_engine()
+if 'pipeline' not in st.session_state:
+    st.session_state.pipeline = get_realtime_pipeline()
 
-if 'swap_enabled' not in st.session_state:
-    st.session_state.swap_enabled = True
-
-if 'enhance_quality' not in st.session_state:
-    st.session_state.enhance_quality = "medium"
-
-if 'blend_enabled' not in st.session_state:
-    st.session_state.blend_enabled = True
-
-if 'camera_id' not in st.session_state:
-    st.session_state.camera_id = 0
-
-if 'source_photo' not in st.session_state:
-    st.session_state.source_photo = None
-
-if 'source_face' not in st.session_state:
-    st.session_state.source_face = None
-
-if 'active_character' not in st.session_state:
-    st.session_state.active_character = None
-
-if 'pipeline_running' not in st.session_state:
-    st.session_state.pipeline_running = False
-
-if 'chat_messages' not in st.session_state:
-    st.session_state.chat_messages = []
-
-if 'physics_enabled' not in st.session_state:
-    st.session_state.physics_enabled = True
-
-if 'physics_intensity' not in st.session_state:
-    st.session_state.physics_intensity = 0.7
-
-if 'background_mode' not in st.session_state:
-    st.session_state.background_mode = 'parallax'
-
-if 'hand_viz_enabled' not in st.session_state:
-    st.session_state.hand_viz_enabled = True
-
-if 'tracker' not in st.session_state:
-    st.session_state.tracker = get_tracker()
+for key, default in [
+    ('swap_enabled', True), ('enhance_quality', 'medium'), ('blend_enabled', True),
+    ('camera_id', 0), ('source_photo', None), ('source_face', None),
+    ('active_character', None), ('pipeline_running', False), ('chat_messages', []),
+    ('physics_enabled', True), ('physics_intensity', 0.7), ('background_mode', 'parallax'),
+    ('hand_viz_enabled', True), ('eye_engine_enabled', True), ('gesture_enabled', True),
+    ('talking_head_enabled', True), ('lip_sync_enabled', True), ('audio_input_mode', 'none'),
+    ('heygen_mode', False), ('camera_source', 'usb'), ('camera_url', ''),
+    ('recording', False), ('recorded_frames', []), ('show_3d_mesh', False),
+    ('show_eye_viz', False), ('show_gesture_viz', False),
+]:
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 def load_source_photo(uploaded_file):
     if uploaded_file is not None:
@@ -103,24 +104,22 @@ def load_source_photo(uploaded_file):
             st.session_state.source_photo = img
             st.session_state.source_face = source_face
             return True, f"Face detected! Confidence: {source_face.det_score:.3f}"
-        else:
-            return False, "No face detected in the uploaded photo. Try a different image."
+        return False, "No face detected in the uploaded photo."
     return False, "No file uploaded."
 
-def process_frame_callback(frame, source_face):
-    swapper = st.session_state.swapper
-    swapper.physics_enabled = st.session_state.physics_enabled
-    swapper.hand_overlay_enabled = st.session_state.hand_viz_enabled
-    swapper.background_mode = st.session_state.background_mode
-    if st.session_state.physics_enabled and hasattr(swapper, 'tracker'):
-        swapper.tracker.config.intensity = st.session_state.physics_intensity
-    return swapper.process_frame(
-        frame,
-        source_face,
-        blend=st.session_state.blend_enabled,
-        enhance=(st.session_state.enhance_quality != 'low'),
-        enhance_quality=st.session_state.enhance_quality
-    )
+def apply_heygen_mode():
+    st.session_state.heygen_mode = True
+    st.session_state.swap_enabled = True
+    st.session_state.physics_enabled = True
+    st.session_state.eye_engine_enabled = True
+    st.session_state.gesture_enabled = True
+    st.session_state.talking_head_enabled = True
+    st.session_state.lip_sync_enabled = True
+    st.session_state.background_mode = 'parallax'
+    st.session_state.enhance_quality = 'high'
+    st.session_state.blend_enabled = True
+    st.session_state.physics_intensity = 0.85
+    st.success("🚀 HeyGen Mode activated! All engines enabled at maximum quality.")
 
 def generate_qr_code(url):
     try:
@@ -136,291 +135,264 @@ def generate_qr_code(url):
         return None
 
 with st.sidebar:
-    st.markdown('<p class="main-header">🎭 DeepFaceReal Physics</p>', unsafe_allow_html=True)
-    st.caption(f'{CREDITS}')
-    st.markdown("---")
+    st.markdown('<p class="main-header">🎭 DeepFaceReal<br>Physics</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="sub-header">{APP_VERSION} | {CREDITS}</p>', unsafe_allow_html=True)
 
-    st.subheader("📷 Camera")
-    col1, col2 = st.columns(2)
-    with col1:
-        camera_id = st.number_input("Camera ID", min_value=0, max_value=10, value=st.session_state.camera_id)
-        if camera_id != st.session_state.camera_id:
-            st.session_state.camera_id = camera_id
-    with col2:
-        st.session_state.swap_enabled = st.toggle("Swap Active", value=st.session_state.swap_enabled)
+    if st.button("🚀 HeyGen Mode", type="primary", use_container_width=True):
+        apply_heygen_mode()
+
+    st.markdown("---")
+    st.subheader("📷 Source")
+    cam_id = st.number_input("Camera ID", 0, 10, st.session_state.camera_id)
+    if cam_id != st.session_state.camera_id:
+        st.session_state.camera_id = cam_id
+    st.session_state.swap_enabled = st.toggle("Face Swap", st.session_state.swap_enabled)
 
     st.subheader("⚙️ Quality")
     st.session_state.enhance_quality = st.select_slider(
-        "Enhancement", options=["low", "medium", "high"], value=st.session_state.enhance_quality
+        "Enhancement", ["low", "medium", "high"], st.session_state.enhance_quality
     )
-    st.session_state.blend_enabled = st.toggle("Seamless Blending", value=st.session_state.blend_enabled)
+    st.session_state.blend_enabled = st.toggle("Seamless Blending", st.session_state.blend_enabled)
+
+    st.subheader("🎨 Engines")
+    st.session_state.face_3d.config.enable_pose_estimation = st.toggle("3D Face Engine", True)
+    st.session_state.talking_head_enabled = st.toggle("Talking Head", st.session_state.talking_head_enabled)
+    st.session_state.lip_sync_enabled = st.toggle("Lip Sync", st.session_state.lip_sync_enabled)
+    st.session_state.eye_engine_enabled = st.toggle("Eye & Gaze", st.session_state.eye_engine_enabled)
+    st.session_state.gesture_enabled = st.toggle("Gestures", st.session_state.gesture_enabled)
 
     st.subheader("🔬 Physics")
-    st.session_state.physics_enabled = st.toggle("Physics Engine", value=st.session_state.physics_enabled)
-    st.session_state.physics_intensity = st.slider(
-        "Physics Intensity", 0.0, 1.0, st.session_state.physics_intensity, 0.05
-    )
+    st.session_state.physics_enabled = st.toggle("Physics", st.session_state.physics_enabled)
+    st.session_state.physics_intensity = st.slider("Intensity", 0.0, 1.0, st.session_state.physics_intensity, 0.05)
 
     st.subheader("🎨 Background")
     st.session_state.background_mode = st.selectbox(
-        "Background Mode", ["static", "parallax", "blur"],
+        "Mode", ["static", "parallax", "blur"],
         index=["static", "parallax", "blur"].index(st.session_state.background_mode)
     )
 
-    st.subheader("✋ Hand Tracking")
-    st.session_state.hand_viz_enabled = st.toggle("Show Hand Skeleton", value=st.session_state.hand_viz_enabled)
+    st.subheader("🎵 Audio Input")
+    st.session_state.audio_input_mode = st.selectbox(
+        "Audio Source", ["none", "mic", "file", "tts"],
+        index=["none", "mic", "file", "tts"].index(st.session_state.audio_input_mode)
+    )
 
-    st.subheader("📊 Physics Status")
-    tracker = st.session_state.get('tracker')
-    if tracker:
-        overlay_data = tracker.get_landmark_data_for_overlay()
-        lmk_count = overlay_data.get('landmark_count', 0)
-        fps = overlay_data.get('fps', 0)
-        st.metric("Landmarks Tracked", lmk_count)
-        st.metric("Tracking FPS", f"{fps:.1f}")
-        blink_state = overlay_data.get('blink_state', 0)
-        ear = overlay_data.get('ear_value', 0)
-        st.metric("Blink State", f"{blink_state:.2f}")
-        st.caption(f"EAR: {ear:.3f}")
-
-    st.subheader("🎬 Pipeline")
-    if st.button("▶️ Start Pipeline" if not st.session_state.pipeline_running else "⏹️ Stop Pipeline"):
-        st.session_state.pipeline_running = not st.session_state.pipeline_running
-        if st.session_state.pipeline_running:
-            st.info("Pipeline started (simulated mode - webcam not available in cloud)")
-        else:
-            st.info("Pipeline stopped")
-    st.markdown("---")
-
-    with st.expander("📖 Quick Guide", expanded=False):
-        st.markdown("""
-1. **Upload a source photo** with a face
-2. **Select or create a character**
-3. **Toggle swap ON** to see the face swap
-4. **Chat** with your character via LLM
-5. **Enable Physics** for full body tracking & smooth motion
-6. **Try Parallax** for 3D depth background
-
-Features:
-- **InsightFace** for face detection & swapping
-- **MediaPipe Holistic** full body tracking (543 landmarks)
-- **Physics Engine** with inertia, springs & momentum
-- **Parallax Background** 3-layer depth system
-- **Poisson blending** for seamless compositing
-- **OpenRouter** for LLM personality
-""")
+    st.subheader("📊 Performance")
+    pipeline = st.session_state.pipeline
+    metrics = pipeline.get_metrics()
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.metric("FPS", f"{metrics.fps:.1f}" if metrics.fps > 0 else "N/A")
+    with col_b:
+        st.metric("Frames", metrics.frames_processed)
 
     st.markdown("---")
     st.markdown(
-        f'<div class="credit-footer">🎭 <span class="powered">{CREDITS}</span></div>',
+        f'<div style="text-align:center;color:#888;font-size:0.8em;">'
+        f'<span class="powered">{CREDITS}</span></div>',
         unsafe_allow_html=True
     )
 
-main_tabs = st.tabs(["🎯 Face Swap", "📱 Mobile Camera", "👤 Characters", "💬 Chat", "⚙️ Settings"])
+tabs = st.tabs(["🎯 Avatar Studio", "📱 Mobile", "👤 Characters", "💬 Chat", "🎬 Engines", "⚙️ Settings"])
 
-with main_tabs[0]:
-    col1, col2 = st.columns([3, 2])
+with tabs[0]:
+    col1, col2 = st.columns([2, 3])
     with col1:
-        st.markdown('<p class="main-header">🎯 Source Photo</p>', unsafe_allow_html=True)
-        uploaded_file = st.file_uploader(
-            "Upload a face photo to swap onto your webcam feed",
-            type=['jpg', 'jpeg', 'png'], key="source_photo_uploader"
-        )
-        if uploaded_file:
-            success, msg = load_source_photo(uploaded_file)
-            if success:
+        st.markdown("### 📸 Source Photo")
+        uploaded = st.file_uploader("Upload face photo", type=['jpg', 'jpeg', 'png'], key="src_photo")
+        if uploaded:
+            ok, msg = load_source_photo(uploaded)
+            if ok:
                 st.success(msg)
-                img_rgb = cv2.cvtColor(st.session_state.source_photo, cv2.COLOR_BGR2RGB)
-                st.image(img_rgb, caption="Source Photo", width=300)
+                st.image(cv2.cvtColor(st.session_state.source_photo, cv2.COLOR_BGR2RGB), width=280)
             else:
                 st.error(msg)
 
         st.markdown("---")
-        st.markdown('<p class="main-header">🖼️ Preview</p>', unsafe_allow_html=True)
-        preview_placeholder = st.empty()
-
+        st.markdown("### 🎯 Preview")
+        prev = st.empty()
         if st.session_state.source_photo is not None:
-            img_copy = st.session_state.source_photo.copy()
+            img = st.session_state.source_photo.copy()
             if st.session_state.swap_enabled and st.session_state.source_face:
                 rendered = st.session_state.swapper.process_frame(
-                    img_copy, st.session_state.source_face,
-                    blend=True, enhance=(st.session_state.enhance_quality != 'low'),
+                    img, st.session_state.source_face,
+                    blend=st.session_state.blend_enabled,
+                    enhance=st.session_state.enhance_quality != 'low',
                     enhance_quality=st.session_state.enhance_quality
                 )
-                img_rgb = cv2.cvtColor(rendered, cv2.COLOR_BGR2RGB)
+                prev.image(cv2.cvtColor(rendered, cv2.COLOR_BGR2RGB), width=400)
             else:
-                img_rgb = cv2.cvtColor(img_copy, cv2.COLOR_BGR2RGB)
-            preview_placeholder.image(img_rgb, caption="Swap Preview", width=400)
+                prev.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), width=400)
         else:
-            preview_placeholder.info("Upload a source photo to see preview")
+            prev.info("Upload a source photo")
+
+    with col2:
+        st.markdown("### 🖥️ Real-Time Preview")
+        preview_rt = st.empty()
+        preview_rt.info("Start the pipeline to see real-time output")
+
+        if st.session_state.heygen_mode:
+            st.markdown(
+                '<div class="heygen-badge" style="display:inline-block;">🚀 HeyGen Mode Active</div>',
+                unsafe_allow_html=True
+            )
 
         st.markdown("---")
-        status_cols = st.columns(4)
-        with status_cols[0]:
-            st.metric("Swap", "🟢 Active" if st.session_state.swap_enabled else "🔴 Off")
-        with status_cols[1]:
-            st.metric("Enhance", st.session_state.enhance_quality.title())
-        with status_cols[2]:
-            st.metric("Blending", "✅ On" if st.session_state.blend_enabled else "❌ Off")
-        with status_cols[3]:
-            st.metric("Physics", "✅ On" if st.session_state.physics_enabled else "❌ Off")
+        st.markdown("### 💾 Recording")
+        rec_col1, rec_col2 = st.columns(2)
+        with rec_col1:
+            if st.button("⏺ Start Recording" if not st.session_state.recording else "⏹ Stop Recording",
+                         type="primary", use_container_width=True):
+                st.session_state.recording = not st.session_state.recording
+                if st.session_state.recording:
+                    st.session_state.recorded_frames = []
+                    st.toast("Recording started!")
+                else:
+                    if st.session_state.recorded_frames:
+                        fps = 20
+                        out_path = "recorded_output.mp4"
+                        h, w = st.session_state.recorded_frames[0].shape[:2]
+                        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                        out = cv2.VideoWriter(out_path, fourcc, fps, (w, h))
+                        for f in st.session_state.recorded_frames:
+                            out.write(f)
+                        out.release()
+                        st.success(f"Saved: {out_path}")
+                        st.session_state.recorded_frames = []
+        with rec_col2:
+            st.metric("Recorded Frames", len(st.session_state.recorded_frames))
 
-with main_tabs[1]:
-    st.markdown('<p class="main-header">📱 Mobile Camera via IP Webcam</p>', unsafe_allow_html=True)
-    st.markdown("### Use your phone as a webcam for WhatsApp calls")
-    st.info("This feature lets you use your phone's camera as the video source for face swapping, enabling WhatsApp Mobile integration.")
+with tabs[1]:
+    st.markdown("### 📱 Mobile Camera Setup")
+    st.info("Use your phone as a webcam via IP Webcam app.")
 
     col_qr, col_guide = st.columns([1, 2])
-
     with col_qr:
-        st.markdown("#### Connect your Phone")
-        phone_ip = st.text_input("Phone IP Address", placeholder="e.g., 192.168.1.100")
+        phone_ip = st.text_input("Phone IP", placeholder="192.168.1.100")
         if phone_ip:
             mjpeg_url = f"http://{phone_ip}:8080/video"
             st.code(mjpeg_url, language="text")
-            qr_bytes = generate_qr_code(mjpeg_url)
-            if qr_bytes:
-                st.image(qr_bytes, caption="Scan to connect", width=200)
-            st.markdown("**Or use auto-detect:**")
-            if st.button("🔍 Scan Local Network"):
-                with st.spinner("Scanning for IP Webcams..."):
-                    from core.webcam_pipeline import scan_ip_webcam_urls
-                    found = scan_ip_webcam_urls(timeout=0.5)
-                    if found:
-                        st.success(f"Found: {found[0]}")
-                        qr_bytes2 = generate_qr_code(found[0])
-                        if qr_bytes2:
-                            st.image(qr_bytes2, width=200)
-                    else:
-                        st.warning("No IP Webcams found. Enter IP manually.")
+            qr = generate_qr_code(mjpeg_url)
+            if qr:
+                st.image(qr, caption="Scan to connect", width=200)
+        if st.button("🔍 Auto-Detect"):
+            with st.spinner("Scanning..."):
+                from core.webcam_pipeline import scan_ip_webcam_urls
+                found = scan_ip_webcam_urls(timeout=0.5)
+                if found:
+                    st.success(f"Found: {found[0]}")
+                    qr2 = generate_qr_code(found[0])
+                    if qr2:
+                        st.image(qr2, width=200)
+                else:
+                    st.warning("Not found. Enter IP manually.")
 
     with col_guide:
-        st.markdown("#### Setup Instructions")
         st.markdown("""
-**For Android (IP Webcam app):**
-1. Install **IP Webcam** from Google Play Store
-2. Open the app and scroll to **Start server**
-3. Note the IP address shown (e.g., `http://192.168.1.100:8080`)
-4. Enter the IP above or scan the QR code
-5. The app streams your phone camera to the face swap pipeline
+        **Setup Steps:**
+        1. Install **IP Webcam** app from Google Play Store
+        2. Open app → tap **Start server**
+        3. Note IP (e.g., `192.168.1.100:8080`)
+        4. Enter IP above or scan QR code
 
-**For WhatsApp Desktop:**
-1. Start the pipeline with IP Webcam source
-2. Open WhatsApp Desktop
-3. In call settings, select **DeepFakeCam** as camera
-4. Your swapped face appears in real-time
-
-**Camera Source Options:**
-- `usb` - Standard USB webcam
-- `ip_webcam` - Phone camera via IP Webcam app
-- `custom_url` - Any MJPEG stream URL
+        **Camera Source:**
+        - `usb` - Standard webcam
+        - `ip_webcam` - Phone camera
+        - `custom_url` - Any MJPEG URL
         """)
+        st.session_state.camera_source = st.selectbox(
+            "Source", ["usb", "ip_webcam", "custom_url"],
+            key="cam_src"
+        )
+        if st.button("Apply Source"):
+            st.success(f"Camera source: {st.session_state.camera_source}")
 
-    st.markdown("---")
-    st.markdown("#### Camera Source Configuration")
-    cam_source = st.selectbox("Camera Source", ["usb", "ip_webcam", "custom_url"])
-    cam_url = st.text_input("Custom URL (if applicable)", placeholder="http://192.168.1.100:8080/video")
-    if st.button("Apply Camera Source"):
-        st.session_state.camera_source = cam_source
-        st.session_state.camera_url = cam_url
-        st.success(f"Camera source set to: {cam_source}")
-
-with main_tabs[2]:
-    st.markdown('<p class="main-header">👤 Characters</p>', unsafe_allow_html=True)
-    char_tabs = st.tabs(["Gallery", "Create", "Manage"])
-
-    with char_tabs[0]:
-        characters = st.session_state.char_manager.list_characters()
-        if characters:
-            for char_name in characters:
-                char = st.session_state.char_manager.get_character(char_name)
+with tabs[2]:
+    st.markdown("### 👤 Characters")
+    ctabs = st.tabs(["Gallery", "Create", "Manage"])
+    with ctabs[0]:
+        chars = st.session_state.char_manager.list_characters()
+        if chars:
+            for name in chars:
+                char = st.session_state.char_manager.get_character(name)
                 if char:
-                    with st.container():
-                        st.markdown(f'<div class="char-card">', unsafe_allow_html=True)
-                        st.markdown(f"**{char.name}**")
-                        st.caption(f"Voice: {'✅' if char.voice_enabled else '❌'} | Swap: {'✅' if char.swap_enabled else '❌'} | Quality: {char.enhance_quality}")
-                        if st.button(f"Select {char.name}", key=f"select_{char_name}"):
-                            st.session_state.active_character = char_name
-                            st.session_state.llm.set_character(char.name, char.system_prompt)
-                            if char.photo_path and os.path.exists(char.photo_path):
-                                img = cv2.imread(char.photo_path)
-                                st.session_state.source_photo = img
-                                face = st.session_state.swapper.get_source_face(img)
-                                if face:
-                                    st.session_state.source_face = face
-                            st.success(f"Activated: {char.name}")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="char-card">', unsafe_allow_html=True)
+                    st.markdown(f"**{char.name}**")
+                    st.caption(f"Voice: {'✅' if char.voice_enabled else '❌'} | Quality: {char.enhance_quality}")
+                    if st.button(f"Select {name}", key=f"sel_{name}"):
+                        st.session_state.active_character = name
+                        st.session_state.llm.set_character(char.name, char.system_prompt)
+                        if char.photo_path and os.path.exists(char.photo_path):
+                            img = cv2.imread(char.photo_path)
+                            st.session_state.source_photo = img
+                            face = st.session_state.swapper.get_source_face(img)
+                            if face:
+                                st.session_state.source_face = face
+                        st.success(f"Activated: {name}")
+                    st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.info("No characters yet. Create one in the 'Create' tab.")
+            st.info("No characters. Create one!")
 
         if st.session_state.active_character:
             st.success(f"Active: {st.session_state.active_character}")
         else:
             st.warning("No character selected")
 
-    with char_tabs[1]:
-        st.markdown("### Create New Character")
-        new_name = st.text_input("Character Name", placeholder="e.g., Einstein")
-        new_prompt = st.text_area(
-            "System Prompt (personality)",
-            value="You are a friendly and knowledgeable assistant. Be helpful and concise.",
-            height=150
-        )
-        new_voice = st.toggle("Enable Voice", value=False)
-        char_photo = st.file_uploader("Character Photo (optional)", type=['jpg', 'jpeg', 'png'], key="char_photo_uploader")
-
-        if st.button("Create Character", type="primary"):
+    with ctabs[1]:
+        st.markdown("### Create Character")
+        new_name = st.text_input("Name", placeholder="e.g., Einstein")
+        new_prompt = st.text_area("System Prompt",
+                                  "You are a friendly assistant. Be helpful and concise.", height=100)
+        new_voice = st.toggle("Voice", False)
+        char_photo = st.file_uploader("Photo", type=['jpg', 'jpeg', 'png'], key="char_photo")
+        if st.button("Create", type="primary"):
             if new_name:
                 char = st.session_state.char_manager.create_character(
                     name=new_name, system_prompt=new_prompt, voice_enabled=new_voice
                 )
-                if char_photo is not None:
-                    photo_path = os.path.join(
-                        os.path.dirname(__file__), 'profiles',
-                        f"{new_name.replace(' ', '_')}_photo.jpg"
-                    )
-                    with open(photo_path, 'wb') as f:
+                if char_photo:
+                    path = os.path.join(os.path.dirname(__file__), 'profiles',
+                                        f"{new_name.replace(' ', '_')}_photo.jpg")
+                    with open(path, 'wb') as f:
                         f.write(char_photo.getvalue())
-                    bytes_data = char_photo.getvalue()
-                    nparr = np.frombuffer(bytes_data, np.uint8)
+                    nparr = np.frombuffer(char_photo.getvalue(), np.uint8)
                     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    char.photo_path = path
                     face_emb = st.session_state.swapper.extract_face_embedding(img)
-                    source_face = st.session_state.swapper.get_source_face(img)
-                    char.photo_path = photo_path
+                    src_face = st.session_state.swapper.get_source_face(img)
                     if face_emb is not None:
                         char.face_embedding = face_emb
-                    if source_face is not None:
-                        char.source_face = source_face
+                    if src_face is not None:
+                        char.source_face = src_face
                 st.session_state.char_manager.save_character(new_name)
                 st.success(f"Character '{new_name}' created!")
                 st.rerun()
             else:
-                st.error("Please enter a character name")
+                st.error("Enter a name")
 
-    with char_tabs[2]:
-        characters = st.session_state.char_manager.list_characters()
-        if characters:
-            delete_name = st.selectbox("Select character to delete", characters, key="delete_select")
-            if st.button("🗑️ Delete", type="secondary"):
-                st.session_state.char_manager.delete_character(delete_name)
-                if st.session_state.active_character == delete_name:
+    with ctabs[2]:
+        chars = st.session_state.char_manager.list_characters()
+        if chars:
+            del_name = st.selectbox("Select to delete", chars, key="del_char")
+            if st.button("🗑️ Delete"):
+                st.session_state.char_manager.delete_character(del_name)
+                if st.session_state.active_character == del_name:
                     st.session_state.active_character = None
-                st.success(f"Deleted: {delete_name}")
+                st.success(f"Deleted: {del_name}")
                 st.rerun()
         else:
-            st.info("No characters to manage.")
+            st.info("No characters to manage")
 
-with main_tabs[3]:
+with tabs[3]:
     st.markdown("### 💬 Chat with Character")
-    chat_container = st.container(height=300)
-    with chat_container:
+    chat = st.container(height=300)
+    with chat:
         for msg in st.session_state.chat_messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-
     if prompt := st.chat_input("Type your message..."):
         if st.session_state.active_character is None:
-            st.warning("Please select a character first")
+            st.warning("Select a character first")
         else:
             st.session_state.chat_messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
@@ -430,44 +402,114 @@ with main_tabs[3]:
                     response = st.session_state.llm.send_message(prompt)
                 st.markdown(response)
             st.session_state.chat_messages.append({"role": "assistant", "content": response})
-
     if st.button("Clear Chat"):
         st.session_state.chat_messages = []
         st.session_state.llm.clear_history()
         st.rerun()
 
-with main_tabs[4]:
-    st.markdown('<p class="main-header">⚙️ Settings</p>', unsafe_allow_html=True)
-    st.markdown("#### Face Swap Settings")
-    st.session_state.swap_enabled = st.toggle("Face Swap Enabled", value=st.session_state.swap_enabled, key="settings_swap")
-    st.session_state.blend_enabled = st.toggle("Seamless Blending (Poisson)", value=st.session_state.blend_enabled, key="settings_blend")
-    st.session_state.enhance_quality = st.select_slider(
-        "Enhancement Quality", options=["low", "medium", "high"], value=st.session_state.enhance_quality, key="settings_enhance"
-    )
+with tabs[4]:
+    st.markdown("### 🎬 Engine Status")
+    ec1, ec2, ec3 = st.columns(3)
+    with ec1:
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        f3d = st.session_state.face_3d.get_status()
+        st.markdown(f"**3D Face Engine**")
+        st.caption(f"FPS: {f3d['fps']} | Frames: {f3d['frames_processed']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("#### Physics Settings")
-    st.session_state.physics_enabled = st.toggle("Physics Engine Enabled", value=st.session_state.physics_enabled, key="settings_physics")
-    st.session_state.physics_intensity = st.slider(
-        "Physics Intensity", 0.0, 1.0, st.session_state.physics_intensity, 0.05, key="settings_phys_intensity"
-    )
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        th = st.session_state.talking_head.get_status()
+        st.markdown(f"**Talking Head**")
+        st.caption(f"Librosa: {'✅' if th['has_librosa'] else '❌'} | Frames: {th['frame_count']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("#### Background Settings")
-    st.session_state.background_mode = st.selectbox(
-        "Background Mode", ["static", "parallax", "blur"],
-        index=["static", "parallax", "blur"].index(st.session_state.background_mode),
-        key="settings_bg"
-    )
+    with ec2:
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        ls = st.session_state.lip_sync.get_status()
+        st.markdown(f"**Lip Sync**")
+        st.caption(f"Model: {ls['model_type']} | Wav2Lip: {'✅' if ls['wav2lip_available'] else '❌'} | Phoneme: {ls['last_phoneme']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("#### Hand Tracking")
-    st.session_state.hand_viz_enabled = st.toggle("Show Hand Skeleton Overlay", value=st.session_state.hand_viz_enabled, key="settings_hands")
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        ee = st.session_state.eye_engine.get_status()
+        st.markdown(f"**Eye & Gaze**")
+        st.caption(f"Blink: {ee['state']['is_blinking']} | Gaze: {ee['state']['gaze']} | Pupil: {ee['state']['pupil_size']}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    with ec3:
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        ge = st.session_state.gesture_engine.get_status()
+        st.markdown(f"**Gesture Engine**")
+        st.caption(f"Type: {ge['state']['gesture_type']} | Queue: {ge['state']['queue_size']}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="engine-card">', unsafe_allow_html=True)
+        pm = st.session_state.pipeline.get_metrics()
+        st.markdown(f"**Pipeline**")
+        st.caption(f"FPS: {pm.fps:.1f} | Frames: {pm.frames_processed} | Latency: {pm.average_latency:.1f}ms")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("#### Per-Engine Stage Times")
+    if pm and pm.stage_times:
+        stages = pm.stage_times
+        cols = st.columns(len(stages))
+        for i, (name, time_ms) in enumerate(stages.items()):
+            with cols[i]:
+                st.metric(name, f"{time_ms:.1f}ms")
+
+with tabs[5]:
+    st.markdown("### ⚙️ Settings")
+    s1, s2 = st.columns(2)
+    with s1:
+        st.markdown("#### Face Swap")
+        st.session_state.swap_enabled = st.toggle("Enabled", st.session_state.swap_enabled, key="ss1")
+        st.session_state.blend_enabled = st.toggle("Blending", st.session_state.blend_enabled, key="ss2")
+        st.session_state.enhance_quality = st.select_slider(
+            "Quality", ["low", "medium", "high"], st.session_state.enhance_quality, key="ss3"
+        )
+
+        st.markdown("#### Physics")
+        st.session_state.physics_enabled = st.toggle("Physics Enabled", st.session_state.physics_enabled, key="ss4")
+        st.session_state.physics_intensity = st.slider("Intensity", 0.0, 1.0, st.session_state.physics_intensity, 0.05, key="ss5")
+
+        st.markdown("#### Background")
+        st.session_state.background_mode = st.selectbox("Mode", ["static", "parallax", "blur"],
+                                                        key="ss6")
+
+    with s2:
+        st.markdown("#### Engines")
+        st.session_state.eye_engine_enabled = st.toggle("Eye Engine", st.session_state.eye_engine_enabled, key="ss7")
+        st.session_state.gesture_enabled = st.toggle("Gesture Engine", st.session_state.gesture_enabled, key="ss8")
+        st.session_state.talking_head_enabled = st.toggle("Talking Head", st.session_state.talking_head_enabled, key="ss9")
+        st.session_state.lip_sync_enabled = st.toggle("Lip Sync", st.session_state.lip_sync_enabled, key="ss10")
+
+        st.markdown("#### Visualization")
+        st.session_state.show_3d_mesh = st.toggle("Show 3D Mesh", st.session_state.show_3d_mesh, key="ss11")
+        st.session_state.show_eye_viz = st.toggle("Show Eye Tracking", st.session_state.show_eye_viz, key="ss12")
+        st.session_state.show_gesture_viz = st.toggle("Show Gesture Info", st.session_state.show_gesture_viz, key="ss13")
+
+    st.markdown("---")
     st.markdown("#### System Info")
-    st.code(f"Physics Engine: {'Active' if st.session_state.physics_enabled else 'Disabled'}\nBackground Mode: {st.session_state.background_mode}\nHand Viz: {'On' if st.session_state.hand_viz_enabled else 'Off'}\nCredits: {CREDITS}", language="text")
+    st.code(
+        f"Version: {APP_VERSION}\n"
+        f"Physics: {'Active' if st.session_state.physics_enabled else 'Disabled'}\n"
+        f"3D Face: {'Active' if st.session_state.face_3d.config.enable_pose_estimation else 'Disabled'}\n"
+        f"Talking Head: {'Active' if st.session_state.talking_head_enabled else 'Disabled'}\n"
+        f"Lip Sync: {'Active' if st.session_state.lip_sync_enabled else 'Disabled'}\n"
+        f"Eye Engine: {'Active' if st.session_state.eye_engine_enabled else 'Disabled'}\n"
+        f"Gestures: {'Active' if st.session_state.gesture_enabled else 'Disabled'}\n"
+        f"Background: {st.session_state.background_mode}\n"
+        f"Audio: {st.session_state.audio_input_mode}\n"
+        f"HeyGen Mode: {'ON' if st.session_state.heygen_mode else 'OFF'}\n"
+        f"Credits: {CREDITS}",
+        language="text"
+    )
 
 st.markdown("---")
 st.markdown(
     f'<div class="credit-footer">'
-    f'🎭 DeepFaceReal Physics | Full Body Tracking + Physics + WhatsApp Mobile/Desktop | '
+    f'🎭 DeepFaceReal-Physics {APP_VERSION} | Hyper-Realistic AI Avatar | '
     f'<span class="powered">{CREDITS}</span>'
     f'</div>',
     unsafe_allow_html=True

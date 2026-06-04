@@ -1,3 +1,8 @@
+"""
+DeepFaceReal-Physics FastAPI v2.0.0
+Powered By DeathLegionTeamLK
+Endpoints: /generate/talking-head, /animate/face, WebSocket /ws/realtime, /config/render
+"""
 import os
 import sys
 import cv2
@@ -15,24 +20,36 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from core.face_swapper import get_swapper, FaceSwapper
-from core.character_manager import get_character_manager, Character
-from core.llm_character import create_llm_character, LLMCharacter
-from core.physics_engine import get_tracker, HolisticTracker
-from core.webcam_pipeline import get_pipeline, WebcamPipeline
+from core.face_swapper import get_swapper
+from core.character_manager import get_character_manager
+from core.llm_character import create_llm_character
+from core.physics_engine import get_tracker
+from core.webcam_pipeline import get_pipeline
+from core.face_3d_engine import get_face_3d_engine
+from core.talking_head import get_talking_head
+from core.lip_sync import create_lip_sync
+from core.eye_engine import get_eye_engine
+from core.gesture_engine import get_gesture_engine
+from core.pipeline import get_realtime_pipeline
 
-CREDITS = 'Powered By DeathLegionTeamLK'
+CREDITS = "Powered By DeathLegionTeamLK"
 
 swapper = get_swapper(det_size=(320, 320))
 char_manager = get_character_manager()
 llm = create_llm_character(os.environ.get("OPENROUTER_API_KEY", ""))
 tracker = get_tracker()
 pipeline = get_pipeline()
+face_3d = get_face_3d_engine()
+talking_head = get_talking_head()
+lip_sync = create_lip_sync()
+eye_engine = get_eye_engine()
+gesture_engine = get_gesture_engine()
+rt_pipeline = get_realtime_pipeline()
 
 app = FastAPI(
-    title="DeepFaceReal Physics API",
-    description=f"Real-time deepfake with full body tracking, physics simulation, and WhatsApp integration. {CREDITS}",
-    version="1.0.0"
+    title="DeepFaceReal-Physics API v2",
+    description=f"Hyper-Realistic AI Avatar engine. {CREDITS}",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -42,6 +59,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class TalkingHeadRequest(BaseModel):
+    audio_b64: str = Field(..., description="Base64-encoded WAV audio")
+    face_b64: str = Field(..., description="Base64-encoded source face image")
+    fps: int = 20
+    duration_seconds: Optional[float] = None
+
+
+class AnimateFaceRequest(BaseModel):
+    face_b64: str = Field(..., description="Base64-encoded face image")
+    expression_coeffs: Optional[List[float]] = None
+    head_pose: Optional[Dict[str, float]] = None
+    return_mesh: bool = False
+
+
+class RenderConfigRequest(BaseModel):
+    engine: str = Field(..., description="Engine to configure: face3d|talking_head|lip_sync|eye|gesture|pipeline")
+    config: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ChatRequest(BaseModel):
@@ -66,34 +102,12 @@ class CharacterCreate(BaseModel):
     blend_enabled: bool = True
 
 
-class CharacterResponse(BaseModel):
-    name: str
-    system_prompt: str
-    voice_enabled: bool
-    swap_enabled: bool
-    enhance_quality: str
-    created_at: str
-    has_photo: bool
-    has_face_data: bool
-    credits: str = CREDITS
-
-
 class SwapRequest(BaseModel):
     source_face_b64: Optional[str] = None
     target_b64: Optional[str] = None
     blend: bool = True
     enhance: bool = True
     enhance_quality: str = "medium"
-
-
-class StatusResponse(BaseModel):
-    status: str
-    swapper_loaded: bool
-    characters_available: int
-    active_character: Optional[str]
-    llm_configured: bool
-    has_api_key: bool
-    credits: str = CREDITS
 
 
 class PhysicsConfigRequest(BaseModel):
@@ -123,33 +137,40 @@ def decode_b64_image(b64_str: str) -> np.ndarray:
     return img
 
 
-def encode_b64_image(img: np.ndarray) -> str:
-    _, buffer = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+def encode_b64_image(img: np.ndarray, quality: int = 85) -> str:
+    _, buffer = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, quality])
     return base64.b64encode(buffer).decode('utf-8')
 
 
 @app.get("/")
 async def root():
     return {
-        "message": "DeepFaceReal Physics API",
-        "version": "1.0.0",
+        "message": "DeepFaceReal-Physics API v2 - Hyper-Realistic AI Avatar",
+        "version": "2.0.0",
         "docs": "/docs",
         "credits": CREDITS
     }
 
 
-@app.get("/status", response_model=StatusResponse)
+@app.get("/status")
 async def get_status():
     active_char = char_manager.get_active_character()
-    return StatusResponse(
-        status="running",
-        swapper_loaded=True,
-        characters_available=len(char_manager.list_characters()),
-        active_character=active_char.name if active_char else None,
-        llm_configured=True,
-        has_api_key=bool(os.environ.get("OPENROUTER_API_KEY", "")),
-        credits=CREDITS
-    )
+    return {
+        "status": "running",
+        "version": "2.0.0",
+        "swapper_loaded": True,
+        "face3d_loaded": True,
+        "talking_head_loaded": True,
+        "eye_engine_loaded": True,
+        "gesture_engine_loaded": True,
+        "lip_sync_loaded": True,
+        "characters_available": len(char_manager.list_characters()),
+        "active_character": active_char.name if active_char else None,
+        "llm_configured": True,
+        "has_api_key": bool(os.environ.get("OPENROUTER_API_KEY", "")),
+        "pipeline_fps": rt_pipeline.get_metrics().fps,
+        "credits": CREDITS
+    }
 
 
 @app.post("/swap")
@@ -166,12 +187,10 @@ async def swap_face(request: SwapRequest):
                 source_face = active_char.source_face
             else:
                 raise HTTPException(status_code=400, detail="No source face available")
-
         if request.target_b64:
             target_img = decode_b64_image(request.target_b64)
         else:
             raise HTTPException(status_code=400, detail="No target image provided")
-
         result = swapper.process_frame(
             target_img, source_face,
             blend=request.blend, enhance=request.enhance,
@@ -191,7 +210,76 @@ async def swap_face(request: SwapRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/generate/talking-head")
+async def generate_talking_head(request: TalkingHeadRequest):
+    try:
+        audio_data = base64.b64decode(request.audio_b64)
+        face_img = decode_b64_image(request.face_b64)
+        result = talking_head.process_full_audio(audio_data, face_img, fps=request.fps)
+        frames_b64 = [encode_b64_image(f) for f in result["frames"]]
+        return JSONResponse({
+            "success": True,
+            "frames": [f"data:image/jpeg;base64,{f}" for f in frames_b64],
+            "total_frames": len(result["frames"]),
+            "head_pose_sequence": result.get("head_poses", []),
+            "expression_sequence": result.get("expressions", []),
+            "fps": request.fps,
+            "credits": CREDITS
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Talking head generation failed: {str(e)}")
+
+
+@app.post("/animate/face")
+async def animate_face(request: AnimateFaceRequest):
+    try:
+        face_img = decode_b64_image(request.face_b64)
+        if request.expression_coeffs:
+            face_3d.apply_expression_coefficients(request.expression_coeffs)
+        if request.head_pose:
+            face_3d.set_head_pose(request.head_pose)
+        mesh_data = face_3d.process_frame(face_img)
+        output = face_3d.render_mesh()
+        result_b64 = encode_b64_image(output)
+        response = {
+            "success": True,
+            "face": f"data:image/jpeg;base64,{result_b64}",
+            "mesh_points": mesh_data["mesh"][:50].tolist() if mesh_data.get("mesh") is not None else [],
+            "head_pose_6dof": mesh_data.get("pose", {}),
+            "expression_coefficients": mesh_data.get("expression_coeffs", []),
+            "credits": CREDITS
+        }
+        if request.return_mesh and mesh_data.get("mesh") is not None:
+            mesh_b64 = encode_b64_image(mesh_data.get("mesh_viz", output))
+            response["mesh_visualization"] = f"data:image/jpeg;base64,{mesh_b64}"
+        return JSONResponse(response)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Face animation failed: {str(e)}")
+
+
+@app.post("/config/render")
+async def config_render(request: RenderConfigRequest):
+    engine_map = {
+        "face3d": face_3d.config,
+        "talking_head": talking_head.config,
+        "lip_sync": lip_sync.config,
+        "eye": eye_engine.config,
+        "gesture": gesture_engine.config,
+    }
+    if request.engine == "pipeline":
+        for k, v in request.config.items():
+            setattr(rt_pipeline, k, v)
+        return {"success": True, "engine": "pipeline", "updated": request.config, "credits": CREDITS}
+    cfg = engine_map.get(request.engine)
+    if cfg is None:
+        raise HTTPException(status_code=400, detail=f"Unknown engine '{request.engine}'")
+    for k, v in request.config.items():
+        if hasattr(cfg, k):
+            setattr(cfg, k, v)
+    return {"success": True, "engine": request.engine, "updated": request.config, "credits": CREDITS}
+
+
+@app.post("/chat")
 async def chat(request: ChatRequest):
     if request.character_name:
         char = char_manager.get_character(request.character_name)
@@ -208,7 +296,7 @@ async def chat(request: ChatRequest):
     )
 
 
-@app.post("/character", response_model=CharacterResponse)
+@app.post("/character")
 async def create_character_endpoint(
     name: str = Form(...),
     system_prompt: str = Form(""),
@@ -240,13 +328,13 @@ async def create_character_endpoint(
         source_face = swapper.get_source_face(img)
         char_manager.set_character_face(name, photo_path, face_emb, source_face)
     char_manager.save_character(name)
-    return CharacterResponse(
-        name=char.name, system_prompt=char.system_prompt,
-        voice_enabled=char.voice_enabled, swap_enabled=char.swap_enabled,
-        enhance_quality=char.enhance_quality, created_at=char.created_at,
-        has_photo=has_photo, has_face_data=char.face_embedding is not None,
-        credits=CREDITS
-    )
+    return {
+        "name": char.name, "system_prompt": char.system_prompt,
+        "voice_enabled": char.voice_enabled, "swap_enabled": char.swap_enabled,
+        "enhance_quality": char.enhance_quality, "created_at": char.created_at,
+        "has_photo": has_photo, "has_face_data": char.face_embedding is not None,
+        "credits": CREDITS
+    }
 
 
 @app.get("/characters")
@@ -260,13 +348,13 @@ async def get_character(name: str):
     char = char_manager.get_character(name)
     if char is None:
         raise HTTPException(status_code=404, detail=f"Character '{name}' not found")
-    return CharacterResponse(
-        name=char.name, system_prompt=char.system_prompt,
-        voice_enabled=char.voice_enabled, swap_enabled=char.swap_enabled,
-        enhance_quality=char.enhance_quality, created_at=char.created_at,
-        has_photo=bool(char.photo_path), has_face_data=char.face_embedding is not None,
-        credits=CREDITS
-    )
+    return {
+        "name": char.name, "system_prompt": char.system_prompt,
+        "voice_enabled": char.voice_enabled, "swap_enabled": char.swap_enabled,
+        "enhance_quality": char.enhance_quality, "created_at": char.created_at,
+        "has_photo": bool(char.photo_path), "has_face_data": char.face_embedding is not None,
+        "credits": CREDITS
+    }
 
 
 @app.delete("/characters/{name}")
@@ -290,22 +378,14 @@ async def activate_character(name: str):
 @app.post("/physics/config")
 async def update_physics_config(request: PhysicsConfigRequest):
     config = tracker.config
-    if request.mass is not None:
-        config.mass = request.mass
-    if request.damping is not None:
-        config.damping = request.damping
-    if request.spring_stiffness is not None:
-        config.spring_stiffness = request.spring_stiffness
-    if request.friction is not None:
-        config.friction = request.friction
-    if request.gravity is not None:
-        config.gravity = request.gravity
-    if request.smoothing_alpha is not None:
-        config.smoothing_alpha = request.smoothing_alpha
-    if request.intensity is not None:
-        config.intensity = request.intensity
-    if request.enabled is not None:
-        config.enabled = request.enabled
+    if request.mass is not None: config.mass = request.mass
+    if request.damping is not None: config.damping = request.damping
+    if request.spring_stiffness is not None: config.spring_stiffness = request.spring_stiffness
+    if request.friction is not None: config.friction = request.friction
+    if request.gravity is not None: config.gravity = request.gravity
+    if request.smoothing_alpha is not None: config.smoothing_alpha = request.smoothing_alpha
+    if request.intensity is not None: config.intensity = request.intensity
+    if request.enabled is not None: config.enabled = request.enabled
     return {
         "success": True,
         "config": {
@@ -333,12 +413,7 @@ async def get_physics_status():
 async def switch_camera_source(request: CameraSourceRequest):
     try:
         pipeline.switch_camera_source(request.source, request.url)
-        return {
-            "success": True,
-            "source": request.source,
-            "url": request.url,
-            "credits": CREDITS
-        }
+        return {"success": True, "source": request.source, "url": request.url, "credits": CREDITS}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -348,6 +423,56 @@ async def get_camera_status():
     status = pipeline.get_status()
     status["credits"] = CREDITS
     return status
+
+
+@app.websocket("/ws/realtime")
+async def websocket_realtime(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        await websocket.send_text(json.dumps({
+            "type": "connected",
+            "message": "DeepFaceReal-Physics real-time stream connected",
+            "credits": CREDITS
+        }))
+        fps = 20
+        frame_interval = 1.0 / fps
+        while True:
+            data = await asyncio.wait_for(websocket.receive_text(), timeout=5.0)
+            message = json.loads(data)
+            msg_type = message.get("type", "")
+            if msg_type == "start_stream":
+                fps = message.get("fps", 20)
+                frame_interval = 1.0 / fps
+                await websocket.send_text(json.dumps({"type": "stream_ready", "fps": fps}))
+            elif msg_type == "frame":
+                target_b64 = message.get("data", "")
+                if target_b64:
+                    target_img = decode_b64_image(target_b64)
+                    active_char = char_manager.get_active_character()
+                    if active_char and active_char.source_face is not None:
+                        result = swapper.process_frame(target_img, active_char.source_face)
+                        result_b64 = encode_b64_image(result)
+                        mesh_data = face_3d.process_frame(result)
+                        eye_state = eye_engine.update()
+                        await websocket.send_text(json.dumps({
+                            "type": "frame",
+                            "data": f"data:image/jpeg;base64,{result_b64}",
+                            "head_pose": mesh_data.get("pose", {}),
+                            "eye_state": eye_state,
+                            "credits": CREDITS
+                        }))
+                        await asyncio.sleep(frame_interval)
+            elif msg_type == "ping":
+                await websocket.send_text(json.dumps({"type": "pong"}))
+            elif msg_type == "stop":
+                break
+    except (asyncio.TimeoutError, WebSocketDisconnect):
+        pass
+    except Exception as e:
+        try:
+            await websocket.send_text(json.dumps({"type": "error", "content": str(e)}))
+        except:
+            pass
 
 
 @app.websocket("/ws/chat")
@@ -365,7 +490,7 @@ async def websocket_chat(websocket: WebSocket):
                     llm.set_character(char.name, char.system_prompt)
             for chunk in llm.send_message_stream(user_message):
                 await websocket.send_text(json.dumps({"type": "chunk", "content": chunk}))
-            await websocket.send_text(json.dumps({"type": "done", "content": ""}))
+            await websocket.send_text(json.dumps({"type": "done", "content": "", "credits": CREDITS}))
     except WebSocketDisconnect:
         pass
     except Exception as e:
@@ -379,7 +504,9 @@ async def websocket_chat(websocket: WebSocket):
 async def websocket_video(websocket: WebSocket):
     await websocket.accept()
     try:
-        await websocket.send_text(json.dumps({"type": "status", "content": "Video WebSocket connected", "credits": CREDITS}))
+        await websocket.send_text(json.dumps({
+            "type": "status", "content": "Video WebSocket connected", "credits": CREDITS
+        }))
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
@@ -389,10 +516,7 @@ async def websocket_video(websocket: WebSocket):
                     target_img = decode_b64_image(target_b64)
                     active_char = char_manager.get_active_character()
                     if active_char and active_char.source_face is not None:
-                        result = swapper.process_frame(
-                            target_img, active_char.source_face,
-                            blend=True, enhance=True, enhance_quality=active_char.enhance_quality
-                        )
+                        result = swapper.process_frame(target_img, active_char.source_face)
                         result_b64 = encode_b64_image(result)
                         await websocket.send_text(json.dumps({
                             "type": "frame",
@@ -414,17 +538,15 @@ async def websocket_video(websocket: WebSocket):
 
 @app.on_event("startup")
 async def startup():
-    print(f"[API] Starting DeepFaceReal Physics API... {CREDITS}")
-    print(f"[API] Characters loaded: {char_manager.list_characters()}")
-    api_key = os.environ.get("OPENROUTER_API_KEY", "")
-    print(f"[API] OpenRouter API key: {'Set' if api_key else 'Not set (demo mode)'}")
-    print("[API] API ready on port 8081")
+    print(f"[API v2] Starting DeepFaceReal-Physics API v2.0.0... {CREDITS}")
+    print(f"[API v2] Characters: {char_manager.list_characters()}")
+    print(f"[API v2] OpenRouter: {'Set' if os.environ.get('OPENROUTER_API_KEY') else 'Demo mode'}")
+    print("[API v2] Ready on port 8081")
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    print("[API] Shutting down...")
-    char_manager.save_character("")
+    print("[API v2] Shutting down...")
 
 
 if __name__ == "__main__":
