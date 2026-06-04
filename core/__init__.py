@@ -6,7 +6,7 @@ from .character_manager import get_character_manager, CharacterManager, Characte
 from .llm_character import create_llm_character, LLMCharacter, DemoLLMCharacter
 from .webcam_pipeline import get_pipeline, WebcamPipeline, PipelineConfig
 from .lip_sync import create_lip_sync, EnhancedLipSync, LipSyncConfig
-from .physics_engine import get_tracker, HolisticTracker, PhysicsEngine, PhysicsConfig
+from .physics_engine import get_tracker, HolisticTracker, PhysicsConfig
 from .background_engine import get_background, ParallaxBackground, BackgroundConfig
 from .face_3d_engine import get_face_3d_engine, Face3DEngine, Face3DConfig, Face3DData
 from .talking_head import get_talking_head, TalkingHeadEngine, TalkingHeadConfig, MotionFrame, AudioFeatures

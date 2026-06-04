@@ -83,7 +83,7 @@ class AudioFeatureExtractor:
 
     def __init__(self, config: Optional[TalkingHeadConfig] = None):
         self.config = config or TalkingHeadConfig()
-        self.use_librosa = config.use_librosa and HAS_LIBROSA
+        self.use_librosa = self.config.use_librosa and HAS_LIBROSA
 
     def extract(self, audio_chunk: np.ndarray, sample_rate: Optional[int] = None) -> AudioFeatures:
         """Extract features from an audio chunk."""
