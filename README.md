@@ -1,3 +1,7 @@
+<div align="center">
+
+![DeepFaceReal-Physics Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,12,20&height=200&section=header&text=DeepFaceReal-Physics&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Hyper-Realistic%20AI%20Avatar%20%E2%80%94%20HeyGen-Level%20Realism%2C%20Zero%20Monthly%20Fee&descAlignY=62&descAlign=50)
+
 [![GitHub Stars](https://img.shields.io/github/stars/deathlegionteamlk/DeepFaceReal-Physics?style=social)](https://github.com/deathlegionteamlk/DeepFaceReal-Physics)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
@@ -6,27 +10,23 @@
 [![Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-FF4B4B.svg)](https://streamlit.io/)
 [![FastAPI](https://img.shields.io/badge/Built%20with-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
-<meta name="description" content="DeepFaceReal-Physics — Hyper-Realistic AI Avatar System with HeyGen-Level Realism. 3D face reconstruction, audio-driven talking head, Wav2Lip lip sync, natural eye gaze, conversational gestures, and full body physics simulation. CPU-optimized for real-time performance. Powered By DeathLegionTeamLK.">
-<meta name="keywords" content="ai avatar, talking head, deepfake, 3d face reconstruction, wav2lip, lip sync, mediapipe, face swap, heygen alternative, sadtalker, real-time avatar, conversational ai, cpu optimized">
-<meta name="author" content="DeathLegionTeamLK">
+<br>
 
-<div align="center">
-<h1>🎭 DeepFaceReal-Physics</h1>
-<h2>Hyper-Realistic AI Avatar with HeyGen-Level Realism</h2>
-<p><strong>The most advanced open-source AI avatar system — 3D face reconstruction, audio-driven talking head, Wav2Lip lip sync, natural eye gaze, conversational gestures, and real-time pipeline optimization on CPU.</strong></p>
-<p><em>Powered By <strong>DeathLegionTeamLK</strong></em></p>
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&duration=3000&pause=1000&color=FF6B6B&center=true&vCenter=true&multiline=true&width=700&height=80&lines=3D+Face+%E2%80%A2+Lip+Sync+%E2%80%A2+Eye+Gaze+%E2%80%A2+Gestures+%E2%80%A2+Physics;CPU-only+%E2%80%A2+Real-time+%E2%80%A2+Open+Source+%E2%80%A2+Free+Forever" alt="Typing SVG" />
 
 <br>
+
 <p>
 <a href="#-features"><strong>Features</strong></a> •
-<a href="#-comparison"><strong>HeyGen vs SadTalker vs DeepFaceReal</strong></a> •
+<a href="#-heygen-vs-sadtalker-vs-deepfacereal"><strong>Comparison</strong></a> •
 <a href="#-quick-start"><strong>Quick Start</strong></a> •
 <a href="#-architecture"><strong>Architecture</strong></a> •
-<a href="#-engine-documentation"><strong>Engine Docs</strong></a> •
+<a href="#-engine-docs"><strong>Engine Docs</strong></a> •
 <a href="#-api-v2"><strong>API v2</strong></a> •
-<a href="#%EF%B8%8F-build-windows-exe"><strong>Windows EXE</strong></a> •
+<a href="#-windows-exe"><strong>Windows EXE</strong></a> •
 <a href="#-credits"><strong>Credits</strong></a>
 </p>
+
 <br>
 
 [🌟 Star on GitHub](https://github.com/deathlegionteamlk/DeepFaceReal-Physics) • [🐛 Report Bug](https://github.com/deathlegionteamlk/DeepFaceReal-Physics/issues) • [📖 Read Docs](https://github.com/deathlegionteamlk/DeepFaceReal-Physics/blob/main/README.md)
@@ -35,67 +35,88 @@
 
 ---
 
+## 🎬 What Is This?
+
+HeyGen costs $24–240/month and runs in the cloud. SadTalker needs a GPU and still only hits 10 FPS. DeepFaceReal-Physics runs on your CPU, is free, and ships everything: 3D face reconstruction, audio-driven head motion, Wav2Lip lip sync, natural eye gaze, conversational gestures, body physics — the full stack.
+
+No subscription. No GPU required. No waiting on cloud queues.
+
+---
+
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-| 🎯 **3D Face Engine** | 468 MediaPipe face mesh landmarks, Delaunay triangulation for 3D surface mapping, 6DoF head pose estimation (pitch/yaw/roll/xyz), expression coefficient extraction |
-| 🗣️ **Audio-Driven Talking Head** | MFCC/pitch/energy feature extraction, head pose prediction from audio rhythm, speech-synchronized expressions, natural nodding/tilting patterns (inspired by SadTalker/Ditto) |
-| 👄 **Wav2Lip Lip Sync** | Phoneme detection from audio, lip shape prediction matching spoken phonemes, Wav2Lip inference on face region, temporal smoothness, audio buffering for real-time streaming |
-| 👁️ **Natural Eye & Gaze** | Saccade simulation (200-300ms intervals), micro-saccades during fixation, natural blink patterns (every 2-4s, 100-400ms duration), gaze target tracking, pupil rendering |
-| 👐 **Conversational Gestures** | Speech-rhythm hand gestures, shoulder/head micro-movements, posture variations, configurable gesture intensity |
-| 🔄 **Real-Time Pipeline** | Async pipeline: Audio→Features→TalkingHead→LipSync→EyeGaze→Gestures→Composite. Frame skipping, cached inference, async queues for CPU optimization |
-| 🧠 **Full Body Physics** | MediaPipe Holistic (543 landmarks), momentum/inertia, spring dynamics, blink detection |
-| 🖼️ **Parallax Background** | 3-layer depth parallax driven by head position, depth-based blur |
-| 📱 **WhatsApp Mobile** | IP Webcam integration for phone-as-camera |
-| 💬 **LLM Characters** | OpenRouter-powered character AI with personality system prompts |
-| 🖥️ **Professional UI** | Streamlit v2 dashboard with all engine controls, Heygen Mode preset, recording export |
-| 🔌 **REST API + WebSocket** | FastAPI v2 with /generate/talking-head, /animate/face, real-time streaming |
-| 🪟 **Windows EXE** | Build standalone DeepFaceReal.exe with PyInstaller |
+<div align="center">
 
-## 📊 Comparison
+![Features Animation](https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=2,3,30&height=3&section=header)
 
-| Capability | **HeyGen** ($24-240/mo) | **SadTalker** | **DeepFaceReal-Physics** |
+</div>
+
+| Engine | What It Does |
+|--------|-------------|
+| 🎯 **3D Face** | 468 MediaPipe landmarks, Delaunay triangulation, 6DoF head pose (pitch/yaw/roll/xyz), expression blendshapes |
+| 🗣️ **Talking Head** | MFCC/pitch/energy extraction, audio-to-head-pose mapping, natural nodding/tilting patterns |
+| 👄 **Wav2Lip** | Phoneme detection, lip shape prediction, temporal smoothing, real-time audio buffering |
+| 👁️ **Eye & Gaze** | Saccades every 200–300ms, natural blinks every 2–4s, gaze target tracking, pupil rendering |
+| 👐 **Gestures** | Speech-rhythm hand movement, shoulder/head micro-shifts, posture variation, 0.0–1.0 intensity knob |
+| 🔄 **Pipeline** | Async multi-stage queue, frame skipping, cached inference — all CPU-optimized |
+| 🧠 **Body Physics** | MediaPipe Holistic (543 landmarks), momentum/inertia, spring dynamics |
+| 🖼️ **Parallax BG** | 3-layer depth parallax driven by head position, depth blur |
+| 📱 **Mobile Camera** | IP Webcam integration for Android phone as webcam |
+| 💬 **Characters** | OpenRouter LLM with personality system prompts |
+| 🖥️ **UI** | Streamlit v2 dashboard, HeyGen Mode preset, recording export |
+| 🔌 **API** | FastAPI v2 with REST + WebSocket endpoints |
+| 🪟 **Windows EXE** | PyInstaller standalone build |
+
+---
+
+## 📊 HeyGen vs SadTalker vs DeepFaceReal
+
+<div align="center">
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=2000&pause=800&color=00D4AA&center=true&vCenter=true&width=500&lines=Spoiler%3A+free+wins." alt="Spoiler" />
+</div>
+
+| Capability | **HeyGen** ($24–240/mo) | **SadTalker** | **DeepFaceReal-Physics** |
 |------------|:---:|:---:|:---:|
 | 3D Face Reconstruction | ✅ | ❌ | ✅ |
 | Audio-Driven Head Motion | ✅ | ✅ | ✅ |
 | Wav2Lip Lip Sync | ✅ | ❌ | ✅ |
 | Natural Eye Gaze | ✅ | ❌ | ✅ |
 | Conversational Gestures | ✅ | ❌ | ✅ |
-| Real-Time (≥15 FPS CPU) | ❌ (Cloud) | ⚠️ (10 FPS GPU) | ✅ (15-20 FPS CPU) |
+| Real-Time ≥15 FPS | ❌ Cloud | ⚠️ 10 FPS GPU | ✅ **15–20 FPS CPU** |
 | Face Swap | ❌ | ❌ | ✅ |
-| LLM Character AI | ⚠️ (Limited) | ❌ | ✅ |
+| LLM Character AI | ⚠️ Limited | ❌ | ✅ |
 | Self-Hosted | ❌ | ✅ | ✅ |
 | Open Source | ❌ | ✅ | ✅ |
-| Price | **$24-240/month** | Free | **Free** |
+| **Price** | **$24–240/month** | Free | **Free** |
 | WhatsApp Integration | ❌ | ❌ | ✅ |
-| Windows EXE | N/A | Manual | ✅ (PyInstaller) |
+| Windows EXE | N/A | Manual | ✅ |
 | API + WebSocket | ✅ | ❌ | ✅ |
-| GPU Required | ✅ (Cloud) | ✅ (GPU) | ❌ **(CPU only)** |
+| GPU Required | ✅ | ✅ | ❌ **CPU only** |
 
-> **DeepFaceReal-Physics matches or exceeds HeyGen features while being completely free, open-source, and CPU-optimized.** No GPU required, no monthly subscription.
+---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.10+
-- 4GB+ RAM (8GB recommended)
-- Webcam (USB or Android phone via IP Webcam)
+<div align="center">
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=15&duration=1800&pause=600&color=FFD700&center=true&vCenter=true&width=400&lines=Clone+%E2%86%92+Install+%E2%86%92+Run.+That%27s+it." alt="Quick start hint" />
+</div>
 
-### Installation
+**Prerequisites:** Python 3.10+, 4GB RAM (8GB recommended), webcam
+
+### Install & Run
 
 ```bash
-# Clone the repository
+# Clone
 git clone https://github.com/deathlegionteamlk/DeepFaceReal-Physics.git
 cd DeepFaceReal-Physics
 
-# Install dependencies
+# Install
 pip install -r requirements.txt
 
-# Run the web dashboard
+# Start the UI (port 8080)
 streamlit run app.py --server.port 8080
 
-# In another terminal, run the API server
+# In a second terminal — start the API (port 8081)
 python api.py
 ```
 
@@ -106,169 +127,182 @@ docker build -t deepfacereal-physics .
 docker run -p 8080:8080 -p 8081:8081 deepfacereal-physics
 ```
 
+---
+
 ## 🏗️ Architecture
 
 ```
-                          ┌──────────────────────────────┐
-                          │    Input Sources              │
-                          │  ┌─────┐ ┌────────┐ ┌──────┐ │
-                          │  │USB  │ │IP      │ │Audio │ │
-                          │  │Cam  │ │Webcam  │ │File  │ │
-                          │  └──┬──┘ └───┬────┘ └──┬───┘ │
-                          └─────┼────────┼─────────┼─────┘
-                                │        │         │
-                          ┌─────▼────────▼─────────▼──────┐
-                          │    Audio Feature Extraction    │
-                          │  (MFCC, Pitch, Energy, F0)    │
-                          └───────────┬───────────────────┘
-                                      │
-                          ┌───────────▼───────────────────┐
-                          │  3D Face Engine               │
-                          │  ┌─────────────────────────┐  │
-                          │  │ MediaPipe Face Mesh     │  │
-                          │  │ (468 landmarks)         │  │
-                          │  │ Delaunay Triangulation  │  │
-                          │  │ 6DoF Head Pose Est.     │  │
-                          │  │ Expression Coefficients │  │
-                          │  └─────────────────────────┘  │
-                          └───────────┬───────────────────┘
-                                      │
-                          ┌───────────▼───────────────────┐
-                          │   Talking Head Engine          │
-                          │  ├─ Head pose from audio      │
-                          │  ├─ Expression from speech    │
-                          │  └─ Natural head motion       │
-                          └───────────┬───────────────────┘
-                                      │
-                          ┌───────────▼───────────────────┐
-                          │   Lip Sync (Wav2Lip)           │
-                          │  ├─ Phoneme detection         │
-                          │  ├─ Lip shape prediction      │
-                          │  ├─ Wav2Lip inference         │
-                          │  └─ Temporal smoothness       │
-                          └───────────┬───────────────────┘
-                                      │
-              ┌───────────────────────┼───────────────────────┐
-              │                       │                       │
-     ┌────────▼────────┐   ┌─────────▼─────────┐   ┌─────────▼────────┐
-     │  Eye & Gaze      │   │  Gesture Engine    │   │  Physics Engine  │
-     │  Engine          │   │  ────────────────  │   │  ─────────────  │
-     │  ├─ Saccades     │   │  Hand gestures    │   │  Momentum/inert│
-     │  ├─ Blinks       │   │  Shoulder/head    │   │  Spring dynamics│
-     │  ├─ Gaze track   │   │  Posture          │   │  Frame skipping │
-     │  └─ Pupil render │   │  Intensity config │   │  Async queues   │
-     └────────┬────────┘   └─────────┬─────────┘   └─────────┬────────┘
-              │                       │                       │
-              └───────────────────────┼───────────────────────┘
-                                      │
-                          ┌───────────▼───────────────────┐
-                          │   Composite & Render           │
-                          │  Face Swap + All Overlays     │
-                          │  + Background + Enhancement   │
-                          └───────────┬───────────────────┘
-                                      │
-                          ┌───────────▼───────────────────┐
-                          │   Output                      │
-                          │  ┌────────┐ ┌───────┐ ┌────┐ │
-                          │  │Streamlit│ │FastAPI│ │Virt│ │
-                          │  │UI :8080│ │:8081  │ │Cam │ │
-                          │  └────────┘ └───────┘ └────┘ │
-                          └──────────────────────────────┘
+                    ┌──────────────────────────────┐
+                    │        Input Sources          │
+                    │  ┌──────┐ ┌────────┐ ┌─────┐ │
+                    │  │ USB  │ │   IP   │ │Audio│ │
+                    │  │ Cam  │ │ Webcam │ │File │ │
+                    │  └──┬───┘ └───┬────┘ └──┬──┘ │
+                    └─────┼─────────┼──────────┼───┘
+                          │         │          │
+                    ┌─────▼─────────▼──────────▼───┐
+                    │    Audio Feature Extraction   │
+                    │   (MFCC · Pitch · Energy · F0)│
+                    └──────────────┬────────────────┘
+                                   │
+                    ┌──────────────▼────────────────┐
+                    │         3D Face Engine         │
+                    │  MediaPipe 468 landmarks       │
+                    │  Delaunay Triangulation        │
+                    │  6DoF Head Pose (solvePnP)     │
+                    │  Expression Blendshapes        │
+                    └──────────────┬────────────────┘
+                                   │
+                    ┌──────────────▼────────────────┐
+                    │       Talking Head Engine      │
+                    │  Audio → head pose             │
+                    │  Audio → expression            │
+                    │  Natural motion patterns       │
+                    └──────────────┬────────────────┘
+                                   │
+                    ┌──────────────▼────────────────┐
+                    │       Lip Sync (Wav2Lip)       │
+                    │  Phoneme detection             │
+                    │  Lip shape prediction          │
+                    │  Wav2Lip inference             │
+                    │  Temporal smoothing            │
+                    └──────────────┬────────────────┘
+                                   │
+          ┌────────────────────────┼─────────────────────────┐
+          │                        │                         │
+ ┌────────▼────────┐    ┌──────────▼──────────┐   ┌─────────▼───────┐
+ │  Eye & Gaze     │    │   Gesture Engine     │   │ Physics Engine  │
+ │  Saccades       │    │   Hand gestures      │   │ Momentum        │
+ │  Blinks         │    │   Shoulder/head      │   │ Spring dynamics │
+ │  Gaze tracking  │    │   Posture shifts     │   │ Frame skipping  │
+ │  Pupil render   │    │   Intensity config   │   │ Async queues    │
+ └────────┬────────┘    └──────────┬──────────┘   └─────────┬───────┘
+          │                        │                         │
+          └────────────────────────┼─────────────────────────┘
+                                   │
+                    ┌──────────────▼────────────────┐
+                    │      Composite & Render        │
+                    │  Face swap · overlays          │
+                    │  Background · enhancement      │
+                    └──────────────┬────────────────┘
+                                   │
+                    ┌──────────────▼────────────────┐
+                    │            Output              │
+                    │  Streamlit :8080               │
+                    │  FastAPI   :8081               │
+                    │  Virtual Camera                │
+                    └───────────────────────────────┘
 ```
 
-## 🔧 Engine Documentation
+---
 
-### 1. 3D Face Engine (`core/face_3d_engine.py`)
-- **MediaPipe FaceMesh**: 468 landmark detection
-- **Delaunay Triangulation**: Converts landmarks to 3D mesh surface
-- **6DoF Head Pose**: Pitch, yaw, roll, x, y, z estimation using solvePnP
-- **Expression Coefficients**: Extract and apply expression blendshapes
-- **Usage**: `face_3d = get_face_3d_engine(); mesh = face_3d.process_frame(image)`
+## 🔧 Engine Docs
 
-### 2. Audio-Driven Talking Head (`core/talking_head.py`)
-- **MFCC Extraction**: 13 MFCC coefficients from audio chunks
-- **Pitch Detection**: Fundamental frequency (F0) estimation
-- **Energy Envelope**: RMS energy for speech emphasis
-- **Head Pose Prediction**: Audio features → head motion mapping
-- **Usage**: `talking_head = get_talking_head(); seq = talking_head.process_audio(audio_data, face_img)`
+### 1. 3D Face Engine — `core/face_3d_engine.py`
 
-### 3. Wav2Lip Lip Sync (`core/lip_sync.py`)
-- **Phoneme Detection**: Maps audio to phoneme classes
-- **Lip Shape Prediction**: Audio features → mouth shape parameters
-- **Wav2Lip Integration**: Model download + inference on face region
-- **Temporal Smoothing**: EMA filter for natural transitions
-- **Usage**: `lip_sync = create_lip_sync(); frame = lip_sync.sync_frame(face_img, audio_chunk)`
+468 MediaPipe landmarks → Delaunay triangulation → 3D mesh. 6DoF head pose via `solvePnP`. Expression blendshape extraction.
 
-### 4. Eye & Gaze Engine (`core/eye_engine.py`)
-- **Saccade Simulation**: Rapid eye jumps every 200-300ms
-- **Micro-Saccades**: Tiny movements during fixation periods
-- **Blink Pattern**: Every 2-4 seconds, 100-400ms duration
-- **Gaze Tracking**: Smooth pursuit with configurable targets
-- **Usage**: `eye_engine = get_eye_engine(); state = eye_engine.update()`
+```python
+face_3d = get_face_3d_engine()
+mesh = face_3d.process_frame(image)
+```
 
-### 5. Gesture Engine (`core/gesture_engine.py`)
-- **Speech-Rhythm Gestures**: Hand patterns matching audio energy
-- **Micro-Movements**: Shoulder/head shifts during speech
-- **Posture Variations**: Natural position changes
-- **Intensity Control**: Configurable 0.0-1.0
-- **Usage**: `gesture = get_gesture_engine(); params = gesture.process_gestures(energy)`
+### 2. Talking Head — `core/talking_head.py`
 
-### 6. Real-Time Pipeline (`core/pipeline.py`)
-- **Async Queue System**: Multi-stage async pipeline with per-engine queues
-- **Frame Skipping**: Skip every Nth frame for CPU optimization
-- **Cached Inference**: Cache Wav2Lip results for repeated phonemes
-- **Resolution Management**: Downscale for detection, upscale for output
-- **Usage**: `pipeline = get_realtime_pipeline(); pipeline.start()`
+13 MFCC coefficients, F0 pitch, RMS energy → head pose prediction. Drives speech-synchronized nodding and tilt.
+
+```python
+talking_head = get_talking_head()
+seq = talking_head.process_audio(audio_data, face_img)
+```
+
+### 3. Wav2Lip Lip Sync — `core/lip_sync.py`
+
+Phoneme detection → lip shape parameters → Wav2Lip inference on face region. EMA filter keeps transitions smooth.
+
+```python
+lip_sync = create_lip_sync()
+frame = lip_sync.sync_frame(face_img, audio_chunk)
+```
+
+### 4. Eye & Gaze Engine — `core/eye_engine.py`
+
+Saccades every 200–300ms, micro-saccades during fixation, blinks every 2–4s (100–400ms duration). Configurable gaze targets.
+
+```python
+eye_engine = get_eye_engine()
+state = eye_engine.update()
+```
+
+### 5. Gesture Engine — `core/gesture_engine.py`
+
+Hand patterns keyed to audio energy, shoulder/head micro-movements, posture variation. Intensity from 0.0 to 1.0.
+
+```python
+gesture = get_gesture_engine()
+params = gesture.process_gestures(energy)
+```
+
+### 6. Real-Time Pipeline — `core/pipeline.py`
+
+Async queue per stage. Frame skipping for CPU relief. Cached Wav2Lip results for repeated phonemes. Resolution management (downscale detect, upscale output).
+
+```python
+pipeline = get_realtime_pipeline()
+pipeline.start()
+```
+
+---
 
 ## 💻 Professional UI
 
-The Streamlit UI (`app.py`) runs on port **8080** and includes:
+The Streamlit UI (`app.py`) runs on port **8080**.
 
-| Tab | Features |
-|-----|----------|
+| Tab | What's Inside |
+|-----|---------------|
 | 🎯 **Avatar Studio** | Source photo upload, real-time preview, recording export |
-| 📱 **Mobile** | QR code generator for IP Webcam, auto-detect, camera source selector |
+| 📱 **Mobile** | QR code for IP Webcam, auto-detect, camera source picker |
 | 👤 **Characters** | Gallery, creation, management with face data |
 | 💬 **Chat** | LLM character conversation with message history |
-| 🎬 **Engines** | Live status for all 6 engines, per-engine stage timing |
-| ⚙️ **Settings** | All engine toggles, sliders, quality controls, HeyGen Mode preset |
+| 🎬 **Engines** | Live status for all 6 engines, per-stage timing |
+| ⚙️ **Settings** | Engine toggles, sliders, quality controls, HeyGen Mode preset |
 
-### Heygen Mode
-One-click "HeyGen Mode" preset enables all engines at maximum quality:
-- ✅ 3D Face Engine | ✅ Talking Head | ✅ Wav2Lip | ✅ Eye Gaze | ✅ Gestures
-- ✅ Parallax Background | ✅ Physics | ✅ High Quality Enhancement
+### HeyGen Mode
+
+One click. Turns everything on at max quality:
+
+✅ 3D Face · ✅ Talking Head · ✅ Wav2Lip · ✅ Eye Gaze · ✅ Gestures · ✅ Parallax BG · ✅ Physics · ✅ High Quality Enhancement
+
+---
 
 ## 🔌 API v2
 
-The FastAPI backend (`api.py`) runs on port **8081** with auto-generated docs at `/docs`.
+FastAPI (`api.py`) on port **8081**. Auto-generated docs at `/docs`.
 
-### New v2.0.0 Endpoints
+### v2 Endpoints
 
-| Method | Path | Description |
+| Method | Path | What It Does |
 |--------|------|-------------|
-| **POST** | **`/generate/talking-head`** | Generate talking head video from audio + face image |
-| **POST** | **`/animate/face`** | Animate face with expression coefficients + head pose |
-| **WS** | **`/ws/realtime`** | Real-time streaming with head pose + eye state |
-| **POST** | **`/config/render`** | Configure any engine's render parameters |
+| POST | `/generate/talking-head` | Generate talking head video from audio + face image |
+| POST | `/animate/face` | Animate face with expression coefficients + head pose |
+| WS | `/ws/realtime` | Real-time streaming with head pose + eye state |
+| POST | `/config/render` | Configure any engine's render parameters |
 
 ### Legacy Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | API info + credits |
-| GET | `/status` | Full system status with all engine FPS |
-| POST | `/swap` | Swap face on uploaded image |
+| Method | Path | |
+|--------|------|-|
+| GET | `/` | API info |
+| GET | `/status` | System status with per-engine FPS |
+| POST | `/swap` | Face swap on uploaded image |
 | POST | `/chat` | Send message to character LLM |
 | GET/POST/DELETE | `/characters` | Character CRUD |
 | POST | `/characters/{name}/activate` | Activate character |
-| POST | `/physics/config` | Update physics parameters |
-| GET | `/physics/status` | Current physics state |
-| POST | `/camera/source` | Switch camera source |
-| GET | `/camera/status` | Current camera info |
-| WS | `/ws/chat` | Streaming chat |
-| WS | `/ws/video` | Real-time video |
+| POST/GET | `/physics/config`, `/physics/status` | Physics control |
+| POST/GET | `/camera/source`, `/camera/status` | Camera control |
+| WS | `/ws/chat`, `/ws/video` | Streaming chat + video |
 
-### Talking Head API Example
+### Talking Head — Example
 
 ```bash
 curl -X POST http://localhost:8081/generate/talking-head \
@@ -280,7 +314,7 @@ curl -X POST http://localhost:8081/generate/talking-head \
   }'
 ```
 
-### Render Config Example
+### Render Config — Example
 
 ```bash
 curl -X POST http://localhost:8081/config/render \
@@ -288,9 +322,9 @@ curl -X POST http://localhost:8081/config/render \
   -d '{"engine": "eye", "config": {"blink_interval_min": 1.5, "blink_interval_max": 4.0}}'
 ```
 
-## 🪟 Build Windows EXE
+---
 
-Build a standalone Windows executable with PyInstaller:
+## 🪟 Windows EXE
 
 ```bash
 # On Windows
@@ -300,55 +334,57 @@ python build_exe.py
 # Output: dist/DeepFaceReal.exe + DeepFaceReal_API.exe
 ```
 
-The EXE bundles:
-- All core modules (face_3d_engine, talking_head, lip_sync, eye_engine, gesture_engine, pipeline)
-- InsightFace models (buffalo_l, inswapper_128)
-- MediaPipe models
-- Wav2Lip models (if downloaded)
-- OpenCV, NumPy, Pillow, Streamlit, FastAPI
-- Launcher batch file for easy startup
+The build bundles all core modules, InsightFace models (buffalo_l, inswapper_128), MediaPipe models, Wav2Lip models, OpenCV/NumPy/Pillow/Streamlit/FastAPI, and a launcher batch file.
 
-## 📱 WhatsApp Integration
+---
 
-### Mobile (Android)
-1. Install **IP Webcam** from Google Play Store
-2. Open app → tap **Start Server**
-3. Note IP address (e.g., `192.168.1.100:8080`)
-4. Open Streamlit UI → **📱 Mobile** tab → enter IP or scan QR code
+## 📱 Mobile Integration
 
-### Desktop
-1. `sudo apt install v4l2loopback-dkms`
-2. `sudo modprobe v4l2loopback devices=1 video_nr=10`
-3. Start pipeline → virtual camera appears as device
-4. Select "DeepFakeCam" in WhatsApp Desktop / Zoom / Meet
+### Android (IP Webcam)
+
+1. Install **IP Webcam** from Google Play
+2. Tap **Start Server**
+3. Note the IP (e.g. `192.168.1.100:8080`)
+4. In Streamlit → **📱 Mobile** tab → enter IP or scan QR code
+
+### Desktop Virtual Camera
+
+```bash
+sudo apt install v4l2loopback-dkms
+sudo modprobe v4l2loopback devices=1 video_nr=10
+```
+
+Start the pipeline → virtual camera appears as a device → select "DeepFakeCam" in WhatsApp Desktop, Zoom, or Meet.
+
+---
 
 ## 🛠️ Project Structure
 
 ```
 DeepFaceReal-Physics/
-├── app.py                    # Streamlit UI v2 (Port 8080)
-├── api.py                    # FastAPI v2 (Port 8081)
+├── app.py                    # Streamlit UI v2 (port 8080)
+├── api.py                    # FastAPI v2 (port 8081)
 ├── build_exe.py              # Windows EXE builder
-├── README.md                 # This file
 ├── start.sh                  # Launch both services
 ├── core/
-│   ├── __init__.py           # Module exports
-│   ├── face_3d_engine.py     # 3D Face Reconstruction + Pose
-│   ├── talking_head.py       # Audio-Driven Talking Head
-│   ├── lip_sync.py           # Wav2Lip Lip Sync
-│   ├── eye_engine.py         # Natural Eye & Gaze
-│   ├── gesture_engine.py     # Conversational Gestures
-│   ├── pipeline.py           # Real-Time Pipeline
-│   ├── face_swapper.py       # InsightFace swap (v1 enhanced)
-│   ├── physics_engine.py     # MediaPipe Holistic + physics (v1 preserved)
-│   ├── background_engine.py   # Parallax background (v1 preserved)
-│   ├── webcam_pipeline.py    # Camera capture (v1 preserved)
-│   ├── character_manager.py  # Character profiles (v1 preserved)
-│   └── llm_character.py      # OpenRouter LLM (v1 preserved)
-├── models/                   # Model downloads
+│   ├── face_3d_engine.py     # 3D face reconstruction + pose
+│   ├── talking_head.py       # Audio-driven talking head
+│   ├── lip_sync.py           # Wav2Lip lip sync
+│   ├── eye_engine.py         # Eye & gaze
+│   ├── gesture_engine.py     # Conversational gestures
+│   ├── pipeline.py           # Real-time async pipeline
+│   ├── face_swapper.py       # InsightFace swap
+│   ├── physics_engine.py     # MediaPipe Holistic + physics
+│   ├── background_engine.py  # Parallax background
+│   ├── webcam_pipeline.py    # Camera capture
+│   ├── character_manager.py  # Character profiles
+│   └── llm_character.py      # OpenRouter LLM
+├── models/                   # Downloaded models
 ├── profiles/                 # Character profiles
 └── static/                   # Static assets
 ```
+
+---
 
 ## 📊 Performance
 
@@ -359,56 +395,43 @@ DeepFaceReal-Physics/
 | Lip Sync | 20 FPS | 1 | Face region |
 | Eye Gaze | 60 FPS | 0.5 | Overlay |
 | Gestures | 30 FPS | 0.5 | Overlay |
-| Pipeline Total | **≥15-20 FPS** | **4 cores** | **640×480** |
+| **Pipeline Total** | **≥15–20 FPS** | **4 cores** | **640×480** |
 
-> All engines optimized for CPU with frame skipping (process every 2nd-3rd frame for heavy stages), cached inference for repeated phonemes, and async pipeline queues.
+Every heavy stage processes every 2nd–3rd frame. Repeated phonemes hit the Wav2Lip cache. Async queues keep everything non-blocking.
+
+---
 
 ## 🤝 Contributing
 
-Contributions welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push (`git push origin feature/amazing-feature`)
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit (`git commit -m 'Add your feature'`)
+4. Push (`git push origin feature/your-feature`)
 5. Open a Pull Request
+
+---
 
 ## 📄 License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
+---
+
 ## 🙏 Credits
 
 <div align="center">
-<br>
-<h2>🎭 DeepFaceReal-Physics v2.0.0</h2>
-<h3>Hyper-Realistic AI Avatar with HeyGen-Level Realism</h3>
-<br>
-<p><strong>Powered By <span style="color:#ff6b6b;">DeathLegionTeamLK</span></strong></p>
-<br>
-<p>Built with:</p>
-<p>
-<a href="https://github.com/deepinsight/insightface">InsightFace</a> •
-<a href="https://google.github.io/mediapipe/">MediaPipe</a> •
-<a href="https://github.com/iperov/DeepFaceLab">Wav2Lip</a> •
-<a href="https://onnxruntime.ai/">ONNX Runtime</a> •
-<a href="https://openrouter.ai/">OpenRouter</a> •
-<a href="https://streamlit.io/">Streamlit</a> •
-<a href="https://fastapi.tiangolo.com/">FastAPI</a> •
-<a href="https://scipy.org/">SciPy</a> •
-<a href="https://scikit-image.org/">scikit-image</a>
-</p>
-<br>
-<p>
-<a href="https://github.com/deathlegionteamlk/DeepFaceReal-Physics/stargazers">⭐ Star us on GitHub</a>
-</p>
-<br>
-<p><em>Inspired by SadTalker, Ditto, and the HeyGen platform.</em></p>
-<br>
-</div>
 
----
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,12,20&height=120&section=footer&text=Powered%20By%20DeathLegionTeamLK&fontSize=28&fontColor=ffffff&animation=fadeIn)
 
-<div align="center">
-<small>DeepFaceReal-Physics v2.0.0 | Powered By DeathLegionTeamLK | MIT License</small>
+Built on:
+
+[InsightFace](https://github.com/deepinsight/insightface) • [MediaPipe](https://google.github.io/mediapipe/) • [Wav2Lip](https://github.com/iperov/DeepFaceLab) • [ONNX Runtime](https://onnxruntime.ai/) • [OpenRouter](https://openrouter.ai/) • [Streamlit](https://streamlit.io/) • [FastAPI](https://fastapi.tiangolo.com/) • [SciPy](https://scipy.org/) • [scikit-image](https://scikit-image.org/)
+
+Inspired by SadTalker, Ditto, and HeyGen.
+
+[⭐ Star on GitHub](https://github.com/deathlegionteamlk/DeepFaceReal-Physics/stargazers)
+
+<br>
+<small>DeepFaceReal-Physics v2.0.0 · MIT License · DeathLegionTeamLK</small>
+
 </div>
