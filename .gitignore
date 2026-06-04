@@ -1,0 +1,17 @@
+models/
+__pycache__/
+.env
+*.onnx
+test_data/
+profiles/
+data/
+*.pyc
+*.pyo
+*~
+.DS_Store
+.vscode
+.idea
+*.egg-info
+dist/
+build/
+*.log
