@@ -435,3 +435,7 @@ Inspired by SadTalker, Ditto, and HeyGen.
 <small>DeepFaceReal-Physics v2.0.0 · MIT License · DeathLegionTeamLK</small>
 
 </div>
+
+<!-- DL Code Badge -->
+![Status](https://img.shields.io/badge/status-active-success?style=flat-square)
+
